@@ -1,0 +1,220 @@
+#insert cusstomer
+POST  http://localhost:9200/customers/_create/violetto
+Content-Type: application/json
+
+{
+    "name" : "violet evergarden",
+    "register_at": "2025-10-10 00:00:00"
+}
+
+###
+#get customer mapping
+
+GET   http://localhost:9200/customers/_mapping
+
+### create product 1
+POST http://localhost:9200/products/_create/1
+Content-Type: application/json
+
+{
+  "name" : "Indomie Ayam Bawang",
+  "price" : "2000"
+}
+
+### create product 2
+POST http://localhost:9200/products/_create/2
+Content-Type: application/json
+
+{
+  "name" : "Mie Sedap Soto",
+  "price" : 2000
+}
+
+### create product 3
+POST http://localhost:9200/products/_create/3
+Content-Type: application/json
+
+{
+  "name" : "Mie indomie korea",
+  "price" : 5000
+}
+### get products mapping
+GET http://localhost:9200/products/_mapping
+
+### create order 1
+POST http://localhost:9200/orders/_create/1
+Content-Type: application/json
+
+{
+  "order_date": "2025-10-10 00:00:00",
+  "customer_id": "violetto",
+  "total": "8000",
+  "items": [
+    {
+      "product_id": "1",
+      "price": "2000",
+      "quantity": "2"
+    },
+    {
+      "product_id": "2",
+      "price": "2000",
+      "quantity": "2"
+    }
+  ]
+}
+
+
+
+### get orders mapping
+GET http://localhost:9200/orders/_mapping
+
+### get customers id VIOLET
+GET  http://localhost:9200/customers/_doc/violetto
+
+### get customers id not found
+GET  http://localhost:9200/customers/_doc/bebasdeh
+
+### get sources customers id VIOLET
+GET  http://localhost:9200/customers/_source/violetto
+
+### check customer exist violett
+HEAD http://localhost:9200/customers/_doc/violetto
+
+### check customer exist 
+HEAD http://localhost:9200/customers/_doc/bebasdeh 
+
+
+### multi get api get products 1 and 2
+GET http://localhost:9200/products/_mget
+Content-Type: application/json
+
+{
+  "ids" : [
+    "1", "2"
+  ]
+}
+
+### multi get api 
+GET http://localhost:9200/_mget
+Content-Type: application/json
+
+{
+  "docs": [
+    {
+      "_id" : "1",
+      "_index": "orders"
+    },
+    {
+      "_id" : "violetto",
+      "_index": "customers"
+    },
+    {
+      "_id" : "3",
+      "_index": "products"
+    }
+  ]
+}
+
+###search api all product
+
+POST http://localhost:9200/products/_search
+
+###search api all product page 1
+POST http://localhost:9200/products/_search?size=1&from=0
+
+###search api all product page 2
+POST http://localhost:9200/products/_search?size=1&from=1
+
+###search api all product harga sorting
+POST http://localhost:9200/products/_search?sort=price:asc
+
+###search api all product name sorting
+POST http://localhost:9200/products/_search?sort=name:asc
+
+### create product 3
+POST http://localhost:9200/products/_doc/3
+Content-Type: application/json
+
+{
+  "name" : "Pop Mie korea",
+  "price" : 5000
+}
+
+### create product 4
+POST http://localhost:9200/products/_doc/4
+Content-Type: application/json
+
+{
+  "name" : "all you can eat",
+  "price" : 200000
+}
+
+### create product 5
+POST http://localhost:9200/products/_doc/5
+Content-Type: application/json
+
+{
+  "name" : "ikan beracun",
+  "price" : 50000
+}
+
+###search all product
+POST http://localhost:9200/products/_search?sort=price:desc
+
+### get product 5
+GET http://localhost:9200/products/_doc/5
+
+### update api misal salah satu product
+
+POST http://localhost:9200/products/_update/5
+Content-Type: application/json
+
+{ "doc": {
+    "price": 65000
+    }
+}
+
+### insert customers spammer
+POST http://localhost:9200/customers/_create/spammer
+Content-Type: application/json
+
+{
+  "name" : "spammer",
+  "register_at" : "2023-10-10 00:00:00"
+}
+
+### search customer
+GET http://localhost:9200/customers/_search
+
+### delete api
+DELETE http://localhost:9200/customers/_doc/spammer
+
+### get customert
+GET  http://localhost:9200/customers/_search
+
+###BULK API
+POST  http://localhost:9200/_bulk
+Content-Type: application/json
+
+< elastic_bulk.json
+
+### create alias customer and order
+POST  http://localhost:9200/_aliases
+Content-Type: :application/json
+
+{
+    "actions" :[
+        {
+            "add": {
+                "alias":"customer",
+                "index": "customers"
+            }
+        },
+        {
+            "add": {
+                "alias":"order",
+                "index": "orders"
+            }
+        }
+    ]
+}

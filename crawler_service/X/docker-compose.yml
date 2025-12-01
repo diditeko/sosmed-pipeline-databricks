@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    ports:
+      - "9093:9093"
+
+  twitter_crawler:
+    build: .
+    container_name: twitter_crawler
+    depends_on:
+      - kafka
+    environment:
+      MODE: "TWITTER"
+      KAFKA_CONFIG: "/app/config/kafka_config.yaml"
+    volumes:
+      - ./configs:/app/config
+      - .:/app
+    command: ["python", "twitter_crawler.py"]
+
+
+  kafka_producer:
+    build: .
+    container_name: kafka_producer
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_CONFIG: "/app/config/kafka_config.yaml"
+    volumes:
+      - ./configs:/app/config
+      - .:/app
+    command: ["python", "producer.py"]

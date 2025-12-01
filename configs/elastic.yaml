@@ -1,0 +1,17 @@
+# Elasticsearch indexing settings
+index_prefix: "social_posts"
+index_pattern: "social_posts-%Y.%m.%d"   # jika gunakan daily index
+default_index: "social_posts-current"
+
+bulk:
+  chunk_size: 2000
+  max_retries: 3
+  retry_backoff_seconds: 2
+
+connection:
+  host: "http://localhost"
+  port: 9200
+  username: "{{secret:ES_USER}}"
+  password: "{{secret:ES_PASS}}"
+  use_ssl: false
+  verify_certs: false   # di prod wajib true & pakai TLS

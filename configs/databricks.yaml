@@ -1,0 +1,13 @@
+workspace_url: "https://adb-4242275737062125.5.azuredatabricks.net/"
+
+cluster:
+  spark_version: "16.4.x-photon-scala2.12"
+  node_type_id: "Standard_D4ds_v5"
+  num_workers: 2
+  autotermination_minutes: 30
+
+libraries:
+  - pypi: "pandas"
+  - pypi: "pymongo[srv]"
+  - maven: "org.mongodb.spark:mongo-spark-connector_2.12:10.3.0"
+  - maven: "org.elasticsearch:elasticsearch-spark-20_2.12:7.17.9"

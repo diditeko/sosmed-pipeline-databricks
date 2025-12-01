@@ -1,0 +1,15 @@
+paths:
+  bronze:
+    root: "abfss://social-raw@socialdataraw.dfs.core.windows.net/bronze/"
+    path: "abfss://social-raw@socialdataraw.dfs.core.windows.net/bronze/tweets_raw"
+    table: "sosial_media_pipeline.bronze.tweets_raw"
+
+  silver:
+    root: "abfss://social-raw@socialdataraw.dfs.core.windows.net/silver/"
+    path: "abfss://social-raw@socialdataraw.dfs.core.windows.net/silver/tweets_clean"
+    table: "sosial_media_pipeline.silver.tweets_clean"
+
+  gold:
+    root: "abfss://social-raw@socialdataraw.dfs.core.windows.net/gold/"
+    path: "abfss://social-raw@socialdataraw.dfs.core.windows.net/gold/tweets_sentiment"
+    table: "sosial_media_pipeline.gold.tweets_sentiment"

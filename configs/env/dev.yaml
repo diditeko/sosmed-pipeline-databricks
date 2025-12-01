@@ -1,0 +1,20 @@
+env: "dev"
+databricks:
+  cluster:
+    num_workers: 1
+
+kafka:
+  bootstrap_servers: "localhost:9092"
+
+mongodb:
+  uri: "mongodb://root:example@localhost:27017"
+  ssl: false
+
+elasticsearch:
+  host: "http://localhost"
+  port: 9200
+  username: ""
+  password: ""
+
+paths:
+  storage_prefix: "dbfs:/mnt/social/dev/"

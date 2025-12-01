@@ -1,0 +1,20 @@
+env: "prod"
+
+databricks:
+  cluster:
+    num_workers: 4
+    autotermination_minutes: 15
+
+kafka:
+  bootstrap_servers: "kafka-prod-1:9092,kafka-prod-2:9092,kafka-prod-3:9092"
+
+mongodb:
+  uri: "{{secret:prod.mongo.uri}}"
+
+elasticsearch:
+  host: "https://es-prod.company.com"
+  username: "{{secret:prod.es.user}}"
+  password: "{{secret:prod.es.pass}}"
+
+paths:
+  storage_prefix: "dbfs:/mnt/social/gold/"

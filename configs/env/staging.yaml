@@ -1,0 +1,19 @@
+env: "staging"
+
+databricks:
+  cluster:
+    num_workers: 2
+
+kafka:
+  bootstrap_servers: "kafka-staging-1:9092,kafka-staging-2:9092"
+
+mongodb:
+  uri: "{{secret:staging.mongo.uri}}"
+
+elasticsearch:
+  host: "https://es-staging.company.internal"
+  username: "{{secret:staging.es.user}}"
+  password: "{{secret:staging.es.pass}}"
+
+paths:
+  storage_prefix: "dbfs:/mnt/social/staging/"

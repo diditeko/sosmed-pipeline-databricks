@@ -1,0 +1,15 @@
+# MongoDB sink settings
+database: "social"
+collection_gold: "posts_gold"
+collection_audit: "ingest_audit"
+
+write_options:
+  writeConcern: "majority"
+  batch_size: 1000
+  replace_on_conflict: true   # jika True gunakan upsert berdasarkan primary key
+
+connection:
+  # untuk dev: bisa pakai mongodb://root:pass@localhost:27017
+  uri: "{{secret:MONGO_URI}}" # gunakan secret manager / env var; jangan commit
+  ssl: true
+  ssl_cert_reqs: "CERT_NONE"  # ganti sesuai kebijakan keamanan

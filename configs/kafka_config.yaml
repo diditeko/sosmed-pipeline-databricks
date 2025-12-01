@@ -1,0 +1,39 @@
+# ============================
+# Kafka Connection
+# ============================
+bootstrap_servers: "kafka:9092"    # ✔ benar untuk Docker
+bootstrap_servers_local: "localhost:9093"   # ✔ untuk host machine testing
+topic_raw: "social_raw"
+
+
+# ============================
+# Kafka Consumer
+# ============================
+consumer:
+  group_id: "social-ingest-group"
+  auto_offset_reset: "earliest"
+  enable_auto_commit: false
+  max_poll_records: 500
+  session_timeout_ms: 45000
+  heartbeat_interval_ms: 15000
+
+
+# ============================
+# Kafka Producer
+# ============================
+producer:
+  acks: "all"
+  retries: 5
+  linger_ms: 20
+  batch_size: 32768
+  compression_type: "snappy"        # ✔ recommended for speed
+
+
+# ============================
+# Spark Structured Streaming
+# ============================
+stream_options:
+  startingOffsets: "earliest"
+  maxOffsetsPerTrigger: 50000
+  failOnDataLoss: false
+

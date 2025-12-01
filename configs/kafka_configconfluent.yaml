@@ -1,0 +1,54 @@
+# ==============================================================================
+# Kafka Connection (Diperbarui untuk Confluent Cloud / Managed Kafka)
+# ==============================================================================
+
+# Ganti dengan alamat Bootstrap Server dari cluster Confluent Cloud Anda.
+bootstrap_servers: "${KAFKA_BOOTSTRAP_SERVERS}" 
+
+# Topic yang digunakan untuk data mentah
+topic_raw: "${KAFKA_TOPIC}" 
+
+# --- KONFIGURASI KEAMANAN (WAJIB UNTUK CONFLUENT CLOUD) ---
+security:
+  # Digunakan oleh kafka-python dan Spark untuk koneksi aman
+  protocol: "SASL_SSL"
+  sasl_mechanism: "PLAIN"
+  
+  # Kredensial API Key dan Secret yang harus dimasukkan ke dalam
+  # Variabel Environment (misalnya di file .env)
+  # Kode Python/Spark Anda harus membaca variabel lingkungan ini.
+  api_key: "${KAFKA_API_KEY}" 
+  api_secret: "${KAFKA_API_SECRET}" 
+
+
+# ==============================================================================
+# Kafka Consumer (Diperlukan oleh aplikasi konsumen Python atau Spark)
+# ==============================================================================
+consumer:
+  group_id: "social-ingest-group"
+  auto_offset_reset: "earliest"
+  enable_auto_commit: false
+  max_poll_records: 500
+  session_timeout_ms: 45000
+  heartbeat_interval_ms: 15000
+
+
+# ==============================================================================
+# Kafka Producer (Diperlukan oleh producer Python Anda)
+# ==============================================================================
+producer:
+  acks: "all"
+  retries: 5
+  linger_ms: 20
+  batch_size: 32768
+  compression_type: "gzip"
+
+
+# ==============================================================================
+# Spark Structured Streaming Options (Diperlukan oleh Databricks)
+# ==============================================================================
+stream_options:
+  # Mulai membaca dari awal topik (data lama) atau ganti ke "latest"
+  startingOffsets: "earliest" 
+  maxOffsetsPerTrigger: 50000
+  failOnDataLoss: false

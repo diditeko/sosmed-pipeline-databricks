@@ -1,0 +1,37 @@
+# ========================================
+# Base image
+# ========================================
+FROM python:3.10-slim
+
+# ========================================
+# Environment setup
+# ========================================
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+WORKDIR /app
+
+# ========================================
+# System dependencies (Kafka client needs these)
+# ========================================
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    g++ \
+    librdkafka-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# ========================================
+# Install Python dependencies
+# ========================================
+COPY requirements.txt /app/requirements.txt
+RUN pip install --upgrade pip && pip install -r requirements.txt
+
+# ========================================
+# Copy crawler code
+# ========================================
+COPY . /app
+
+# ========================================
+# Default command (override in docker-compose)
+# ========================================
+CMD ["python", "producer.py"]
