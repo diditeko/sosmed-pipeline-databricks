@@ -502,16 +502,18 @@ def cleaned_text(text):
 #stopword
 factory = StopWordRemoverFactory()
 stopword_remover = factory.create_stop_word_remover()
+#stopword
+factory = StopWordRemoverFactory()
+stopword_remover = factory.create_stop_word_remover()
 def tokenize_stopword(text_cleaned):
     if not text_cleaned:
         return []
     stopword = stopword_remover.remove(text_cleaned)
-    words = stopword.split()
-    return words
+    return stopword
 
 #spark
 clean_text = udf(cleaned_text,StringType())
-tokenize = udf(tokenize_stopword,ArrayType(StringType()))
+stopword = udf(tokenize_stopword,StringType())
 @dlt.table(
     name="twitter_gold_nlp_preprocessed",
     comment="Text yang sudah di-preprocess untuk NLP/ML (stopwords removed, cleaned)",
@@ -543,7 +545,7 @@ def gold_nlp_preprocess():
                 col("text").alias("original_text"),
                 # Preprocessed versions
                 col("cleaned_text"),
-                tokenize(col("cleaned_text")).alias("stopword"),
+                stopword(col("cleaned_text")).alias("stopword_text"),
                 
                 # Engagement metrics
                 "total_engagement",
@@ -554,12 +556,6 @@ def gold_nlp_preprocess():
                 # Language
                 "language"
             )
-            # Add derived features
-            .withColumn("token_count", size(col("stopword")))
-            .withColumn("cleaned_text_length", length(col("cleaned_text")))
-            
-            # Filter out empty cleaned text
-            .filter(col("token_count") > 0)
     )
 
 
