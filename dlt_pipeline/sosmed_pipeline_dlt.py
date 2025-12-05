@@ -75,7 +75,8 @@ TWEET_REPLY_SCHEMA = StructType([
     table_properties={
         "quality": "bronze",
         "pipelines.autoOptimize.zOrderCols": "kafka_timestamp"
-    }
+    },
+    schema="sosial_media_pipeline.twitter_pipe.twitter_bronze"
 )
 def bronze_raw_data():
     """
@@ -121,7 +122,8 @@ def bronze_raw_data():
     table_properties={
         "quality": "silver",
         "pipelines.autoOptimize.zOrderCols": "created_date,keyword,type"
-    }
+    },
+    schema="sosial_media_pipeline.twitter_pipe.twitter_silver"
 )
 @dlt.expect_or_drop("valid_id", "tweet_id IS NOT NULL")
 @dlt.expect_or_drop("valid_text", "text IS NOT NULL AND length(text) > 0")
@@ -223,7 +225,8 @@ def silver_cleaned_data():
 
 @dlt.table(
     name="twitter_gold_tweet_stats",
-    comment="Statistik untuk main tweets (type='tweet') per keyword dan tanggal"
+    comment="Statistik untuk main tweets (type='tweet') per keyword dan tanggal",
+    schema="sosial_media_pipeline.twitter_pipe.twitter_gold_tweetstats"
 )
 def gold_tweet_stats():
     """
@@ -283,7 +286,8 @@ def gold_tweet_stats():
 
 @dlt.table(
     name="twitter_gold_reply_stats",
-    comment="Statistik untuk replies per keyword dan tanggal"
+    comment="Statistik untuk replies per keyword dan tanggal",
+    schema="sosial_media_pipeline.twitter_pipe.twitter_gold_replystats"
 )
 def gold_reply_stats():
     """
@@ -317,7 +321,8 @@ def gold_reply_stats():
 
 @dlt.table(
     name="twitter_gold_top_users",
-    comment="Top users berdasarkan total engagement per keyword"
+    comment="Top users berdasarkan total engagement per keyword",
+    schema="sosial_media_pipeline.twitter_pipe.twitter_gold_topuserstats"
 )
 def gold_top_users():
     """
@@ -356,7 +361,8 @@ def gold_top_users():
 
 @dlt.table(
     name="twitter_gold_conversation_threads",
-    comment="Analisis conversation threads (tweet + replies-nya)"
+    comment="Analisis conversation threads (tweet + replies-nya)",
+    schema="sosial_media_pipeline.twitter_pipe.twitter_gold_threadsstats"
 )
 def gold_conversation_threads():
     """
@@ -412,7 +418,8 @@ def gold_conversation_threads():
 
 @dlt.table(
     name="twitter_gold_trending_hashtags",
-    comment="Trending hashtags per keyword dan tanggal"
+    comment="Trending hashtags per keyword dan tanggal",
+    schema="sosial_media_pipeline.twitter_pipe.twitter_gold_hashtags"
 )
 def gold_trending_hashtags():
     """
@@ -443,7 +450,8 @@ def gold_trending_hashtags():
 
 @dlt.table(
     name="twitter_gold_hourly_activity",
-    comment="Pola aktivitas per jam untuk melihat peak hours"
+    comment="Pola aktivitas per jam untuk melihat peak hours",
+    schema="sosial_media_pipeline.twitter_pipe.twitter_gold_peakhours"
 )
 def gold_hourly_activity():
     """
@@ -506,7 +514,8 @@ clean_text = udf(cleaned_text,StringType())
 tokenize = udf(tokenize_stopword,ArrayType(StringType()))
 @dlt.table(
     name="twitter_gold_nlp_preprocessed",
-    comment="Text yang sudah di-preprocess untuk NLP/ML (stopwords removed, cleaned)"
+    comment="Text yang sudah di-preprocess untuk NLP/ML (stopwords removed, cleaned)",
+    schema="sosial_media_pipeline.twitter_pipe.twitter_gold_nlppreprocess"
 )
 def gold_nlp_preprocess(text):
     """
