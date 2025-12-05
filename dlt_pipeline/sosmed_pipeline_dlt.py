@@ -20,10 +20,10 @@ KAFKA_TOPIC = "Twitter-raw"
 # Load Kafka credentials dari Databricks Secrets
 KAFKA_BOOTSTRAP_SERVERS = spark.conf.get( # type: ignore
     "spark.kafka.bootstrap.servers",
-    dbutils.secrets.get(scope="kafka-confluent", key="bootstrap-servers") # type: ignore
+    dbutils.secrets.get(scope="kafka-confluent-violet", key="bootstrap-servers") # type: ignore
 )
-KAFKA_API_KEY = dbutils.secrets.get(scope="kafka-confluent", key="api-key") # type: ignore
-KAFKA_API_SECRET = dbutils.secrets.get(scope="kafka-confluent", key="api-secret") # type: ignore
+KAFKA_API_KEY = dbutils.secrets.get(scope="kafka-confluent-violet", key="api-key") # type: ignore
+KAFKA_API_SECRET = dbutils.secrets.get(scope="kafka-confluent-violet", key="api-secret") # type: ignore
 
 # Build JAAS config untuk SASL authentication
 JAAS_CONFIG = f'kafkashaded.org.apache.kafka.common.security.plain.PlainLoginModule required username="{KAFKA_API_KEY}" password="{KAFKA_API_SECRET}";'
