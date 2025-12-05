@@ -1,6 +1,14 @@
 import dlt # type: ignore
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
+from pyspark.sql.functions import (
+    col, lower, regexp_replace, length, to_timestamp,
+    udf,array_except,concat_ws,split,year, month, dayofmonth, hour
+)
+from pyspark.sql.types import StringType, ArrayType
+from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
+import re
+import string
 
 # ==============================================================================
 # 1. KONFIGURASI DAN PARAMETER
@@ -18,7 +26,7 @@ KAFKA_API_KEY = dbutils.secrets.get(scope="kafka-confluent", key="api-key") # ty
 KAFKA_API_SECRET = dbutils.secrets.get(scope="kafka-confluent", key="api-secret") # type: ignore
 
 # Build JAAS config untuk SASL authentication
-JAAS_CONFIG = f'org.apache.kafka.common.security.plain.PlainLoginModule required username="{KAFKA_API_KEY}" password="{KAFKA_API_SECRET}";'
+JAAS_CONFIG = f'kafkashaded.org.apache.kafka.common.security.plain.PlainLoginModule required username="{KAFKA_API_KEY}" password="{KAFKA_API_SECRET}";'
 
 print(f"✓ Kafka Bootstrap: {KAFKA_BOOTSTRAP_SERVERS}")
 print(f"✓ Topic: {KAFKA_TOPIC}")
@@ -453,3 +461,104 @@ def gold_hourly_activity():
             )
             .orderBy("keyword", "created_day_of_week", "created_hour")
     )
+
+# ==============================================================================
+# 10. LAYER GOLD - Hourly Activity Pattern
+# ==============================================================================
+def cleaned_text(text):
+    if not text:
+        return ""
+    # Convert text to lowercase
+    text = text.lower()
+    # Remove tab, new line, and backslash
+    text = text.replace('\\t', ' ').replace('\\n', ' ').replace('\\u', '').replace('\\', '')
+    # Remove non ASCII characters
+    text = text.encode('ascii', 'replace').decode('ascii')
+    # Remove mention, link, hashtag
+    text = ' '.join(re.sub("([@#][A-Za-z0-9]+)|(\w+:\/\/\S+)", " ", text).split())
+    # Remove incomplete URL
+    text = text.replace("http://", " ").replace("https://", " ")
+    # Remove numbers
+    text = re.sub(r"\d+", "", text)
+    # Remove punctuation
+    text = text.translate(str.maketrans("", "", string.punctuation))
+    # Remove leading and trailing whitespace
+    text = text.strip()
+    # Remove multiple whitespace into single whitespace
+    text = re.sub('\s+', ' ', text)
+    # Remove single characters
+    text = re.sub(r"\b[a-zA-Z]\b", "", text)
+
+    return text
+    
+#stopword
+factory = StopWordRemoverFactory()
+stopword_remover = factory.create_stop_word_remover()
+def tokenize_stopword(text_cleaned):
+    if not text_cleaned:
+        return []
+    stopword = stopword_remover.remove(text_cleaned)
+    words = stopword.split()
+    return words
+
+#spark
+clean_text = udf(cleaned_text,StringType())
+tokenize = udf(tokenize_stopword,ArrayType(StringType()))
+@dlt.table(
+    name="twitter_gold_nlp_preprocessed",
+    comment="Text yang sudah di-preprocess untuk NLP/ML (stopwords removed, cleaned)"
+)
+def gold_nlp_preprocess(text):
+    """
+    Heavy text preprocessing untuk NLP/ML analysis.
+    Original text tetap ada di Silver layer untuk referensi.
+    """
+    
+    df_cleaned = (
+        dlt.read("twitter_silver")
+            .withColumn("cleaned_text", clean_text(col("text")))
+    )
+
+    return(
+        dlt.read("twitter_silver")
+            .select(
+                # IDs and metadata
+                "tweet_id",
+                "keyword",
+                "type",
+                "username",
+                "created_at",
+                "created_date",
+                
+                # Original text (tetap ada untuk reference)
+                col("text").alias("original_text"),
+                # Preprocessed versions
+                col("cleaned_text"),
+                tokenize(col("cleaned_text")).alias("stopword"),
+                
+                # Engagement metrics
+                "total_engagement",
+                "like_count",
+                "retweet_count",
+                "reply_count",
+                
+                # Language
+                "language"
+            )
+            # Add derived features
+            .withColumn("token_count", size(col("tokens")))
+            .withColumn("cleaned_text_length", length(col("cleaned_text")))
+            
+            # Filter out empty cleaned text
+            .filter(col("token_count") > 0)
+    )
+
+
+
+
+
+
+
+
+
+
