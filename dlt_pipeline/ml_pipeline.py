@@ -73,7 +73,7 @@ def ml_predictions():
     
     # Apply ML predictions
     df_with_predictions = df \
-        .withColumn("sentiment_raw", predict_sentiment(col("cleaned_text"))) \
+        .withColumn("sentiment_raw", predict_sentiment(col("stopword"))) \
         .withColumn("prediction_timestamp", current_timestamp()) \
         .withColumn(
             "sentiment",
@@ -92,6 +92,7 @@ def ml_predictions():
         # Text
         "original_text",
         "cleaned_text",
+        "stopword"
         "token_count",
         
         # ML Predictions
