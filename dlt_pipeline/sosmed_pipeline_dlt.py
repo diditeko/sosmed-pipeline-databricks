@@ -76,7 +76,7 @@ TWEET_REPLY_SCHEMA = StructType([
         "quality": "bronze",
         "pipelines.autoOptimize.zOrderCols": "kafka_timestamp"
     },
-    schema="sosial_media_pipeline.twitter_pipe.twitter_bronze"
+    # schema="sosial_media_pipeline.twitter_pipe.twitter_bronze"
 )
 def bronze_raw_data():
     """
@@ -123,13 +123,13 @@ def bronze_raw_data():
         "quality": "silver",
         "pipelines.autoOptimize.zOrderCols": "created_date,keyword,type"
     },
-    schema="sosial_media_pipeline.twitter_pipe.twitter_silver"
+    # schema="sosial_media_pipeline.twitter_pipe.twitter_silver"
 )
 @dlt.expect_or_drop("valid_id", "tweet_id IS NOT NULL")
 @dlt.expect_or_drop("valid_text", "text IS NOT NULL AND length(text) > 0")
 @dlt.expect_or_drop("valid_username", "username IS NOT NULL")
 @dlt.expect_or_drop("valid_type", "type IN ('tweet', 'reply')")
-@dlt.expect("valid_date", "created_at IS NOT NULL", on_violation="WARN")
+@dlt.expect("valid_date", "created_at IS NOT NULL")
 def silver_cleaned_data():
     """
     Parse JSON dari Bronze layer dan ekstrak fields yang relevan.
@@ -226,7 +226,7 @@ def silver_cleaned_data():
 @dlt.table(
     name="twitter_gold_tweet_stats",
     comment="Statistik untuk main tweets (type='tweet') per keyword dan tanggal",
-    schema="sosial_media_pipeline.twitter_pipe.twitter_gold_tweetstats"
+    # schema="sosial_media_pipeline.twitter_pipe.twitter_gold_tweetstats"
 )
 def gold_tweet_stats():
     """
@@ -287,7 +287,7 @@ def gold_tweet_stats():
 @dlt.table(
     name="twitter_gold_reply_stats",
     comment="Statistik untuk replies per keyword dan tanggal",
-    schema="sosial_media_pipeline.twitter_pipe.twitter_gold_replystats"
+    # schema="sosial_media_pipeline.twitter_pipe.twitter_gold_replystats"
 )
 def gold_reply_stats():
     """
@@ -322,7 +322,7 @@ def gold_reply_stats():
 @dlt.table(
     name="twitter_gold_top_users",
     comment="Top users berdasarkan total engagement per keyword",
-    schema="sosial_media_pipeline.twitter_pipe.twitter_gold_topuserstats"
+    # schema="sosial_media_pipeline.twitter_pipe.twitter_gold_topuserstats"
 )
 def gold_top_users():
     """
@@ -362,7 +362,7 @@ def gold_top_users():
 @dlt.table(
     name="twitter_gold_conversation_threads",
     comment="Analisis conversation threads (tweet + replies-nya)",
-    schema="sosial_media_pipeline.twitter_pipe.twitter_gold_threadsstats"
+    # schema="sosial_media_pipeline.twitter_pipe.twitter_gold_threadsstats"
 )
 def gold_conversation_threads():
     """
@@ -419,7 +419,7 @@ def gold_conversation_threads():
 @dlt.table(
     name="twitter_gold_trending_hashtags",
     comment="Trending hashtags per keyword dan tanggal",
-    schema="sosial_media_pipeline.twitter_pipe.twitter_gold_hashtags"
+    # schema="sosial_media_pipeline.twitter_pipe.twitter_gold_hashtags"
 )
 def gold_trending_hashtags():
     """
@@ -451,7 +451,7 @@ def gold_trending_hashtags():
 @dlt.table(
     name="twitter_gold_hourly_activity",
     comment="Pola aktivitas per jam untuk melihat peak hours",
-    schema="sosial_media_pipeline.twitter_pipe.twitter_gold_peakhours"
+    # schema="sosial_media_pipeline.twitter_pipe.twitter_gold_peakhours"
 )
 def gold_hourly_activity():
     """
@@ -515,9 +515,9 @@ tokenize = udf(tokenize_stopword,ArrayType(StringType()))
 @dlt.table(
     name="twitter_gold_nlp_preprocessed",
     comment="Text yang sudah di-preprocess untuk NLP/ML (stopwords removed, cleaned)",
-    schema="sosial_media_pipeline.twitter_pipe.twitter_gold_nlppreprocess"
+    # schema="sosial_media_pipeline.twitter_pipe.twitter_gold_nlppreprocess"
 )
-def gold_nlp_preprocess(text):
+def gold_nlp_preprocess():
     """
     Heavy text preprocessing untuk NLP/ML analysis.
     Original text tetap ada di Silver layer untuk referensi.
@@ -529,7 +529,7 @@ def gold_nlp_preprocess(text):
     )
 
     return(
-        dlt.read("twitter_silver")
+        df_cleaned
             .select(
                 # IDs and metadata
                 "tweet_id",
@@ -555,7 +555,7 @@ def gold_nlp_preprocess(text):
                 "language"
             )
             # Add derived features
-            .withColumn("token_count", size(col("tokens")))
+            .withColumn("token_count", size(col("stopword")))
             .withColumn("cleaned_text_length", length(col("cleaned_text")))
             
             # Filter out empty cleaned text
